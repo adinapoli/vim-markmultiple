@@ -24,9 +24,22 @@
 "
 
 
-let b:mark_multiple_started = 0
-let b:mark_multiple_in_normal_mode = 0
-let b:mark_multiple_in_visual_mode = 1
+highlight MarkMultiple ctermbg=darkgreen guibg=darkgreen
+
+
+if !exists("g:mark_multiple_started")
+    let g:mark_multiple_started = 0
+endif
+
+
+if !exists("g:mark_multiple_in_normal_mode")
+    let g:mark_multiple_in_normal_mode = 0
+endif
+
+
+if !exists("g:mark_multiple_in_visual_mode")
+    let g:mark_multiple_in_visual_mode = 1
+endif
 
 
 " Leave space for user customization.
@@ -42,13 +55,13 @@ au InsertLeave * call MarkMultipleSubstitute()
 
 fun! MarkMultiple()
     if GetWordUnderTheCursor() == ""
-        let b:mark_multiple_started = 0
+        let g:mark_multiple_started = 0
     else
-        if b:mark_multiple_in_normal_mode
+        if g:mark_multiple_in_normal_mode
             call MarkMultipleNormal()
         endif
 
-        if b:mark_multiple_in_visual_mode
+        if g:mark_multiple_in_visual_mode
             call MarkMultipleVisual()
         endif
     endif
@@ -57,29 +70,39 @@ endfunction
 
 fun! MarkMultipleVisual()
 
-    if !b:mark_multiple_started
-        let b:mark_multiple_starting_curpos = getpos(".")
+    if !g:mark_multiple_started
+        let g:mark_multiple_starting_curpos = getpos(".")
     endif
 
-    let b:mark_multiple_started = 1
-    let b:mark_multiple_curpos = getpos('.')
-    let b:mark_multiple_word = GetWordUnderTheCursor()
+    let g:mark_multiple_started = 1
+    let g:mark_multiple_curpos = getpos('.')
+    let g:mark_multiple_word = GetWordUnderTheCursor()
     call SelectWord()
     call MarkMultipleSwapModes()
 endfunction
 
 
+"Currently unused: bugged and clunky.
+fun! HighlightWord()
+    let line_to_match = g:mark_multiple_curpos[1]
+    let col_start = g:mark_multiple_curpos[2]
+    let col_end   = g:mark_multiple_curpos[2] + len(g:mark_multiple_word)
+    let cmd = '3mat MarkMultiple /\%'.line_to_match.'l\%'.col_start.'c/' 
+    :execute cmd
+endfun
+
+
 fun! MarkMultipleSwapModes()
-    let b:mark_multiple_in_normal_mode = !b:mark_multiple_in_normal_mode
-    let b:mark_multiple_in_visual_mode = !b:mark_multiple_in_visual_mode
+    let g:mark_multiple_in_normal_mode = !g:mark_multiple_in_normal_mode
+    let g:mark_multiple_in_visual_mode = !g:mark_multiple_in_visual_mode
 endfunction
 
 
 fun! MarkMultipleNormal()
-    if b:mark_multiple_started
+    if g:mark_multiple_started
         "Go to the next word
         \<Esc>
-        call setpos('.', b:mark_multiple_curpos)
+        call setpos('.', g:mark_multiple_curpos)
         normal *
         nohlsearch
     endif
@@ -90,15 +113,18 @@ endfunction
 
 fun! MarkMultipleSubstitute()
 
-    if b:mark_multiple_started
+    if g:mark_multiple_started
         let new_word = GetWordUnderTheCursor()
-        let start = b:mark_multiple_starting_curpos[1]
-        let end   = b:mark_multiple_curpos[1]
-        silent! execute start .','. end .  's/\v<' . expand(b:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
-        let b:mark_multiple_started = 0
+        let start = g:mark_multiple_starting_curpos[1]
+        let end   = g:mark_multiple_curpos[1]
+        silent! execute start .','. end .  's/\v<' . expand(g:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
+        let g:mark_multiple_started = 0
 
         "Restore cursor under the last matched
-        call setpos('.', b:mark_multiple_curpos)
+        call setpos('.', g:mark_multiple_curpos)
+
+        "Clear highlighting
+        mat none
     endif
 endfunction
 
