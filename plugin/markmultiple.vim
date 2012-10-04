@@ -94,7 +94,7 @@ fun! MarkMultipleSubstitute()
         let new_word = GetWordUnderTheCursor()
         let start = b:mark_multiple_starting_curpos[1]
         let end   = b:mark_multiple_curpos[1]
-        execute start .','. end .  's/\v<' . expand(b:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
+        silent! execute start .','. end .  's/\v<' . expand(b:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
         let b:mark_multiple_started = 0
     endif
 endfunction
