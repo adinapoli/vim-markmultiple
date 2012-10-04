@@ -23,37 +23,35 @@
 " Inspired from magnars' mark-multiple plugin.
 "
 
-" Main idea: The user start pressing CTRL-M to visually select the word
-" under the cursor. Then when he press CTRL-M again, the editor should:
-" 1) Save infos about previous selection for further reference.
-" 2) Visually select the next word occurence.
-" 3) Highlight the previous word occurence
-" 4) When user leaves visual mode, every change should be put in place.
-"
-
-highlight MarkMultiple ctermbg=Darkgreen guibg=#8CCBEA
-
 
 let b:mark_multiple_started = 0
 let b:mark_multiple_in_normal_mode = 0
 let b:mark_multiple_in_visual_mode = 1
 
 
-nnoremap <C-m> :call MarkMultiple()<CR>
-vnoremap <C-m> :call MarkMultiple()<CR>
-au InsertEnter * call MarkMultipleToggle()
+" Leave space for user customization.
+if !exists("g:mark_multiple_trigger")
+    let g:mark_mutiple_trigger = "<C-n>"
+endif
+
+
+:execute "nnoremap ". g:mark_mutiple_trigger ." :call MarkMultiple()<CR>"
+:execute "vnoremap ". g:mark_mutiple_trigger ." :call MarkMultiple()<CR>"
 au InsertLeave * call MarkMultipleSubstitute()
 
+
 fun! MarkMultiple()
+    if GetWordUnderTheCursor() == ""
+        let b:mark_multiple_started = 0
+    else
+        if b:mark_multiple_in_normal_mode
+            call MarkMultipleNormal()
+        endif
 
-    if b:mark_multiple_in_normal_mode
-        call MarkMultipleNormal()
+        if b:mark_multiple_in_visual_mode
+            call MarkMultipleVisual()
+        endif
     endif
-
-    if b:mark_multiple_in_visual_mode
-        call MarkMultipleVisual()
-    endif
-
 endfunction
 
 
@@ -67,7 +65,6 @@ fun! MarkMultipleVisual()
     let b:mark_multiple_curpos = getpos('.')
     let b:mark_multiple_word = GetWordUnderTheCursor()
     call SelectWord()
-    "call HighlightRegion()
     call MarkMultipleSwapModes()
 endfunction
 
@@ -90,10 +87,6 @@ fun! MarkMultipleNormal()
     call MarkMultipleSwapModes()
 endfunction
 
-fun! MarkMultipleToggle()
-    echo "I'm ready to substitute"
-endfunction
-
 
 fun! MarkMultipleSubstitute()
 
@@ -107,16 +100,8 @@ fun! MarkMultipleSubstitute()
 endfunction
 
 
-fun! HighlightRegion()
-  hi HColor ctermbg=DarkGreen guibg=#ff7777
-  let l_start = line("'<")
-  let l_end = line("'>") + 1
-  execute 'syntax region HColor start=/\%'.l_start.'l/ end=/\%'.l_end.'l/'
-endfunction
-
-
 fun! GetWordUnderTheCursor()
-    return expand("<cword>")
+        return expand("<cword>")
 endfunction
 
 
