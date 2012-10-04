@@ -96,6 +96,9 @@ fun! MarkMultipleSubstitute()
         let end   = b:mark_multiple_curpos[1]
         silent! execute start .','. end .  's/\v<' . expand(b:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
         let b:mark_multiple_started = 0
+
+        "Restore cursor under the last matched
+        call setpos('.', b:mark_multiple_curpos)
     endif
 endfunction
 
