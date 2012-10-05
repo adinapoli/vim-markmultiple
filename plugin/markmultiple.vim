@@ -24,9 +24,6 @@
 "
 
 
-highlight MarkMultiple ctermbg=darkgreen guibg=darkgreen
-
-
 if !exists("g:mark_multiple_started")
     let g:mark_multiple_started = 0
 endif
@@ -78,6 +75,7 @@ fun! MarkMultipleVisual()
     let g:mark_multiple_curpos = getpos('.')
     let g:mark_multiple_word = GetWordUnderTheCursor()
     call SelectWord()
+    call HighlightWord()
     call MarkMultipleSwapModes()
 endfunction
 
@@ -85,10 +83,10 @@ endfunction
 "Currently unused: bugged and clunky.
 fun! HighlightWord()
     let line_to_match = g:mark_multiple_curpos[1]
-    let col_start = g:mark_multiple_curpos[2]
+    let col_start = g:mark_multiple_curpos[2] - 1
     let col_end   = g:mark_multiple_curpos[2] + len(g:mark_multiple_word)
-    let cmd = '3mat MarkMultiple /\%'.line_to_match.'l\%'.col_start.'c/' 
-    :execute cmd
+    let pattern = '\%'.line_to_match.'l\%>'.col_start.'c\%<'.col_end.'c'
+    call matchadd('Search', pattern)
 endfun
 
 
@@ -124,9 +122,15 @@ fun! MarkMultipleSubstitute()
         call setpos('.', g:mark_multiple_curpos)
 
         "Clear highlighting
-        mat none
+        call clearmatches()
     endif
 endfunction
+
+
+" Call this to clear all the highlightings
+fun! MarkMultipleClean()
+    call clearmatches()
+endfun
 
 
 fun! GetWordUnderTheCursor()
