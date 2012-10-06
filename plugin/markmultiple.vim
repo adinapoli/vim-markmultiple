@@ -72,7 +72,7 @@ fun! MarkMultipleVisual()
     endif
 
     let g:mark_multiple_started = 1
-    call MarkMultiplePositionCursor()
+    call MarkMultipleSetCursor()
     let g:mark_multiple_word = GetWordUnderTheCursor()
     call SelectWord()
     call HighlightWord()
@@ -81,18 +81,32 @@ endfunction
 
 
 " This ensures the cursor is properly set.
-fun! MarkMultiplePositionCursor()
+fun! MarkMultipleSetCursor()
+
+    "Save the current position
+    let original_position = getpos('.')
 
     " Go back to the first available space
     :execute "normal F "
     normal %
-    normal %
-    normal l
+
+    " If you end up in a position greater then
+    " the original one, fallback.
+    if getpos('.')[2] > original_position[2]
+
+        "Restore the original, but go backward
+        "to the first space.
+        call setpos('.', original_position)
+        :execute "normal F "
+        normal l
+    else
+        normal %
+        normal l
+    endif
     let g:mark_multiple_curpos = getpos('.')
 endfun
 
 
-"Currently unused: bugged and clunky.
 fun! HighlightWord()
     let line_to_match = g:mark_multiple_curpos[1]
     let col_start = g:mark_multiple_curpos[2] - 1
@@ -113,6 +127,8 @@ fun! MarkMultipleNormal()
         "Go to the next word
         \<Esc>
         call setpos('.', g:mark_multiple_curpos)
+
+        "Search for the next word, but disable search highlighting
         normal *
         nohlsearch
     endif
