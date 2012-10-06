@@ -85,6 +85,8 @@ fun! MarkMultiplePositionCursor()
 
     " Go back to the first available space
     :execute "normal F "
+    normal %
+    normal %
     normal l
     let g:mark_multiple_curpos = getpos('.')
 endfun
