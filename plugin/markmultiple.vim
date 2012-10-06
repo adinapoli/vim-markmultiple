@@ -72,12 +72,22 @@ fun! MarkMultipleVisual()
     endif
 
     let g:mark_multiple_started = 1
-    let g:mark_multiple_curpos = getpos('.')
+    call MarkMultiplePositionCursor()
     let g:mark_multiple_word = GetWordUnderTheCursor()
     call SelectWord()
     call HighlightWord()
     call MarkMultipleSwapModes()
 endfunction
+
+
+" This ensures the cursor is properly set.
+fun! MarkMultiplePositionCursor()
+
+    " Go back to the first available space
+    :execute "normal F "
+    normal l
+    let g:mark_multiple_curpos = getpos('.')
+endfun
 
 
 "Currently unused: bugged and clunky.
