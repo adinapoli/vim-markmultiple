@@ -28,6 +28,9 @@ if !exists("g:mark_multiple_started")
     let g:mark_multiple_started = 0
 endif
 
+if !exists("g:mark_multiple_searching")
+    let g:mark_multiple_searching = 0
+endif
 
 if !exists("g:mark_multiple_in_normal_mode")
     let g:mark_multiple_in_normal_mode = 0
@@ -83,6 +86,42 @@ endfunction
 
 " This ensures the cursor is properly set.
 fun! MarkMultipleSetCursor()
+
+
+    " If we are iterating through words,
+    " leave to Vim the matching stuff
+    if !g:mark_multiple_searching
+
+        let original_position = getpos('.')
+
+        " Try to match an enclosing bracket/tag. If
+        " nothing changes, I'm (almost) sure I'm on a plain word.
+        normal %
+        if getpos('.')[2] == original_position[2]
+            :execute "normal F "
+            normal l
+            let g:mark_multiple_curpos = original_position
+            return
+        endif
+
+        " If moved two are the cases:
+        " It went forward to the next bracket/tag. In that case, fallback
+        " to the original position.
+        if getpos('.')[2] > original_position[2]
+            call setpos('.', original_position)
+            :execute "normal F "
+            normal l
+            let g:mark_multiple_curpos = original_position
+            return
+
+        else
+            normal l
+            let g:mark_multiple_curpos = original_position
+            return
+        endif
+
+    endif
+
     let g:mark_multiple_curpos = getpos('.')
 endfun
 
@@ -104,6 +143,7 @@ endfunction
 
 fun! MarkMultipleNormal()
     if g:mark_multiple_started
+        let g:mark_multiple_searching = 1
         "Go to the next word
         \<Esc>
         call setpos('.', g:mark_multiple_curpos)
@@ -127,6 +167,7 @@ fun! MarkMultipleSubstitute()
         let end   = g:mark_multiple_curpos[1]
         silent! execute start .','. end .  's/\v<' . expand(g:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
         let g:mark_multiple_started = 0
+        let g:mark_multiple_searching = 0
 
         "Restore cursor under the last matched
         call setpos('.', g:mark_multiple_curpos)
