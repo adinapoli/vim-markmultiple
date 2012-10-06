@@ -116,7 +116,7 @@ fun! MarkMultipleSetCursor()
 
         else
             normal l
-            let g:mark_multiple_curpos = original_position
+            let g:mark_multiple_curpos = getpos('.')
             return
         endif
 
@@ -180,8 +180,8 @@ endfunction
 
 " Call this to clear all the highlightings
 fun! MarkMultipleClean()
-    call clearmatches()
     nohlsearch
+    call clearmatches()
 endfun
 
 
