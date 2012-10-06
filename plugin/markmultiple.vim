@@ -69,11 +69,12 @@ fun! MarkMultipleVisual()
 
     if !g:mark_multiple_started
         let g:mark_multiple_starting_curpos = getpos(".")
+        let g:mark_multiple_curpos = g:mark_multiple_starting_curpos
     endif
 
     let g:mark_multiple_started = 1
-    call MarkMultipleSetCursor()
     let g:mark_multiple_word = GetWordUnderTheCursor()
+    call MarkMultipleSetCursor()
     call SelectWord()
     call HighlightWord()
     call MarkMultipleSwapModes()
@@ -82,27 +83,6 @@ endfunction
 
 " This ensures the cursor is properly set.
 fun! MarkMultipleSetCursor()
-
-    "Save the current position
-    let original_position = getpos('.')
-
-    " Go back to the first available space
-    :execute "normal F "
-    normal %
-
-    " If you end up in a position greater then
-    " the original one, fallback.
-    if getpos('.')[2] > original_position[2]
-
-        "Restore the original, but go backward
-        "to the first space.
-        call setpos('.', original_position)
-        :execute "normal F "
-        normal l
-    else
-        normal %
-        normal l
-    endif
     let g:mark_multiple_curpos = getpos('.')
 endfun
 
@@ -140,6 +120,8 @@ endfunction
 fun! MarkMultipleSubstitute()
 
     if g:mark_multiple_started
+
+        "Go to the end of the world
         let new_word = GetWordUnderTheCursor()
         let start = g:mark_multiple_starting_curpos[1]
         let end   = g:mark_multiple_curpos[1]
@@ -158,6 +140,7 @@ endfunction
 " Call this to clear all the highlightings
 fun! MarkMultipleClean()
     call clearmatches()
+    nohlsearch
 endfun
 
 
