@@ -180,7 +180,6 @@ endfunction
 
 " Call this to clear all the highlightings
 fun! MarkMultipleClean()
-    nohlsearch
     call clearmatches()
 endfun
 

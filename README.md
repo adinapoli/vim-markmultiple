@@ -9,7 +9,7 @@ An emacs-like mark multiple plugin, inspired from this plugin:
 **Ctrl-n** to activate and to go to the next match.
 When you are tired, simply change the word under the cursor the usual way.
 
-Screencast coming soon.
+[Watch the screencast!](http://www.youtube.com/watch?v=deGhhILp2PY&feature=youtu.be)
 
 ## Why highlighted words remain on screen?
 Because you "Interrupted" the marking process without actually substituting
