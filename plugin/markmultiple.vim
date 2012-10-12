@@ -32,6 +32,7 @@ if !exists("g:mark_multiple_searching")
     let g:mark_multiple_searching = 0
 endif
 
+
 if !exists("g:mark_multiple_in_normal_mode")
     let g:mark_multiple_in_normal_mode = 0
 endif
@@ -40,6 +41,12 @@ endif
 if !exists("g:mark_multiple_in_visual_mode")
     let g:mark_multiple_in_visual_mode = 1
 endif
+
+
+if !exists("g:mark_multiple_current_chars_on_the_line")
+    let g:mark_multiple_current_chars_on_the_line = col('$')
+endif
+
 
 
 " Leave space for user customization.
@@ -72,10 +79,12 @@ fun! MarkMultipleVisual()
 
     if !g:mark_multiple_started
         let g:mark_multiple_starting_curpos = getpos(".")
+        let g:mark_multiple_current_chars_on_the_line = col('$')
         let g:mark_multiple_curpos = g:mark_multiple_starting_curpos
     endif
 
     let g:mark_multiple_started = 1
+    let g:mark_multiple_current_chars_on_the_line = col('$')
     let g:mark_multiple_word = GetWordUnderTheCursor()
     call MarkMultipleSetCursor()
     call SelectWord()
@@ -161,8 +170,14 @@ fun! MarkMultipleSubstitute()
 
     if g:mark_multiple_started
 
-        "Go to the end of the world
-        let new_word = GetWordUnderTheCursor()
+        "Protect against invalid subs.
+        let valid_sub = MarkMultipleValidSubstitution(col('$'))
+        if !valid_sub
+            let new_word = ""
+        else
+            let new_word = GetWordUnderTheCursor()
+        endif
+
         let start = g:mark_multiple_starting_curpos[1]
         let end   = g:mark_multiple_curpos[1]
         silent! execute start .','. end .  's/\v<' . expand(g:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
@@ -181,11 +196,28 @@ endfunction
 " Call this to clear all the highlightings
 fun! MarkMultipleClean()
     call clearmatches()
-endfun
+    let g:mark_multiple_started = 0
+    let g:mark_multiple_searching = 0
+    let g:mark_multiple_in_normal_mode = 0
+    let g:mark_multiple_in_visual_mode = 1
+endfunction
+
+
+fun! MarkMultipleValidSubstitution(chars_on_the_line)
+
+    "Exploit the lenght of the prev line to determine if
+    "something was changed
+    let prev_chars = g:mark_multiple_current_chars_on_the_line
+    if a:chars_on_the_line <= (prev_chars - len(g:mark_multiple_word))
+        return 0
+    endif
+
+    return 1
+endfunction
 
 
 fun! GetWordUnderTheCursor()
-        return expand("<cword>")
+    return expand("<cword>")
 endfunction
 
 
