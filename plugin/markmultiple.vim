@@ -1,28 +1,10 @@
-" Copyright (C) 2012 Alfredo Di Napoli
-" 
-" Permission is hereby granted, free of charge, to any person obtaining a copy
-" of this software and associated documentation files (the "Software"), to deal
-" in the Software without restriction, including without limitation the rights
-" to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-" copies of the Software, and to permit persons to whom the Software is
-" furnished to do so, subject to the following conditions:
-" 
-" The above copyright notice and this permission notice shall be included in all
-" copies or substantial portions of the Software.
-" 
-" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-" FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-" AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-" LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-" OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-" SOFTWARE.
-" 
-" Vim, arguably the best text-editor in the world.
-" 
-" Inspired from magnars' mark-multiple plugin.
-"
+if exists("g:loaded_mark_multiple") || &cp
+  finish
+endif
 
+let g:loaded_mark_multiple = 1
+let s:keepcpo = &cpo
+set cpo&vim
 
 if !exists("g:mark_multiple_started")
     let g:mark_multiple_started = 0
@@ -51,12 +33,14 @@ endif
 
 " Leave space for user customization.
 if !exists("g:mark_multiple_trigger")
-    let g:mark_mutiple_trigger = "<C-n>"
+    let g:mark_multiple_trigger = "<C-n>"
 endif
 
 
-:execute "nnoremap ". g:mark_mutiple_trigger ." :call MarkMultiple()<CR>"
-:execute "vnoremap ". g:mark_mutiple_trigger ." :call MarkMultiple()<CR>"
+if g:mark_multiple_trigger != ''
+    :execute "nnoremap ". g:mark_multiple_trigger ." :call MarkMultiple()<CR>"
+    :execute "xnoremap ". g:mark_multiple_trigger ." :call MarkMultiple()<CR>"
+endif
 au InsertLeave * call MarkMultipleSubstitute()
 
 
@@ -105,26 +89,26 @@ fun! MarkMultipleSetCursor()
 
         " Try to match an enclosing bracket/tag. If
         " nothing changes, I'm (almost) sure I'm on a plain word.
-        normal %
+        normal! %
         if getpos('.')[2] == original_position[2]
-            :execute "normal F "
-            normal l
+            :execute "normal! F "
+            normal! l
             let g:mark_multiple_curpos = original_position
             return
         endif
 
         " If moved two are the cases:
-        " It went forward to the next bracket/tag. In that case, fallback
+        " It went forward to the next bracket/tag. In that case, fall back
         " to the original position.
         if getpos('.')[2] > original_position[2]
             call setpos('.', original_position)
-            :execute "normal F "
-            normal l
+            :execute "normal! F "
+            normal! l
             let g:mark_multiple_curpos = original_position
             return
 
         else
-            normal l
+            normal! l
             let g:mark_multiple_curpos = getpos('.')
             return
         endif
@@ -154,11 +138,10 @@ fun! MarkMultipleNormal()
     if g:mark_multiple_started
         let g:mark_multiple_searching = 1
         "Go to the next word
-        \<Esc>
         call setpos('.', g:mark_multiple_curpos)
 
         "Search for the next word, but disable search highlighting
-        normal *
+        normal! *
         nohlsearch
     endif
 
@@ -198,14 +181,14 @@ fun! MarkMultipleClean()
     call clearmatches()
     let g:mark_multiple_started = 0
     let g:mark_multiple_searching = 0
-    let g:mark_multiple_in_normal_mode = 0
+    let g:! = 0
     let g:mark_multiple_in_visual_mode = 1
 endfunction
 
 
 fun! MarkMultipleValidSubstitution(chars_on_the_line)
 
-    "Exploit the lenght of the prev line to determine if
+    "Exploit the length of the prev line to determine if
     "something was changed
     let prev_chars = g:mark_multiple_current_chars_on_the_line
     if a:chars_on_the_line <= (prev_chars - len(g:mark_multiple_word))
@@ -222,5 +205,11 @@ endfunction
 
 
 fun! SelectWord()
-    normal viw
+    silent! normal! zO
+    normal! viw
 endfunction
+
+let &cpo = s:keepcpo
+unlet s:keepcpo
+
+" vim: et sw=4
