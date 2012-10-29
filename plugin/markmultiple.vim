@@ -181,7 +181,7 @@ fun! MarkMultipleClean()
     call clearmatches()
     let g:mark_multiple_started = 0
     let g:mark_multiple_searching = 0
-    let g:! = 0
+    let g:mark_multiple_in_normal_mode = 0
     let g:mark_multiple_in_visual_mode = 1
 endfunction
 
