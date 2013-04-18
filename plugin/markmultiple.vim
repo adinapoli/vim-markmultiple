@@ -87,32 +87,13 @@ fun! MarkMultipleSetCursor()
 
         let original_position = getpos('.')
 
-        " Try to match an enclosing bracket/tag. If
-        " nothing changes, I'm (almost) sure I'm on a plain word.
-        normal! %
-        if getpos('.')[2] == original_position[2]
-            :execute "normal! F "
-            normal! l
-            let g:mark_multiple_curpos = original_position
-            return
+        " New algorithm, it relies as much as possible on visual selection
+        " of a word.
+        normal! vw
+        normal! b
+        if getpos('.')[2] < original_position[2]
+            :execute "normal! \e"
         endif
-
-        " If moved two are the cases:
-        " It went forward to the next bracket/tag. In that case, fall back
-        " to the original position.
-        if getpos('.')[2] > original_position[2]
-            call setpos('.', original_position)
-            :execute "normal! F "
-            normal! l
-            let g:mark_multiple_curpos = original_position
-            return
-
-        else
-            normal! l
-            let g:mark_multiple_curpos = getpos('.')
-            return
-        endif
-
     endif
 
     let g:mark_multiple_curpos = getpos('.')
