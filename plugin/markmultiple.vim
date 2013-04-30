@@ -144,7 +144,7 @@ fun! MarkMultipleSubstitute()
 
         let start = g:mark_multiple_starting_curpos[1]
         let end   = g:mark_multiple_curpos[1]
-        silent! execute start .','. end .  's/\v<' . expand(g:mark_multiple_word) .  '>/' . expand(new_word) .'/g'
+        silent! execute start .','. end .  's/\V' . expand(g:mark_multiple_word) .  '/' . expand(new_word) .'/g'
         let g:mark_multiple_started = 0
         let g:mark_multiple_searching = 0
 
