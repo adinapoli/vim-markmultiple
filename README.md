@@ -9,6 +9,14 @@ An emacs-like mark multiple plugin, inspired from this plugin:
 **Ctrl-n** to activate and to go to the next match.
 When you are tired, simply change the word under the cursor the usual way.
 
+## Customisation
+You can put this inside your .vimrc to customize which keybinding you want associate to
+vim-markmultiple. In the example, we are using Control + m:
+
+```
+let g:mark_multiple_trigger = "<C-n>"
+```
+
 [Watch the screencast!](http://www.youtube.com/watch?v=deGhhILp2PY&feature=youtu.be)
 
 ## Why highlighted words remain on screen?
