@@ -3,6 +3,7 @@ if exists("g:loaded_mark_multiple") || &cp
 endif
 
 let g:loaded_mark_multiple = 1
+let s:matches = []
 let s:keepcpo = &cpo
 set cpo&vim
 
@@ -43,6 +44,14 @@ if g:mark_multiple_trigger != ''
 endif
 au InsertLeave * call MarkMultipleSubstitute()
 
+
+fun! s:ClearMatches()
+    let matches_to_delete = s:matches
+    let s:matches = []
+    for match in matches_to_delete
+        call matchdelete(match)
+    endfor
+endfun
 
 fun! MarkMultiple()
     if GetWordUnderTheCursor() == ""
@@ -99,13 +108,13 @@ fun! MarkMultipleSetCursor()
     let g:mark_multiple_curpos = getpos('.')
 endfun
 
-
 fun! HighlightWord()
     let line_to_match = g:mark_multiple_curpos[1]
     let col_start = g:mark_multiple_curpos[2] - 1
     let col_end   = g:mark_multiple_curpos[2] + len(g:mark_multiple_word)
     let pattern = '\%'.line_to_match.'l\%>'.col_start.'c\%<'.col_end.'c'
-    call matchadd('Search', pattern)
+    let new_match = matchadd('Search', pattern)
+    call add(s:matches, new_match)
 endfun
 
 
@@ -152,14 +161,14 @@ fun! MarkMultipleSubstitute()
         call setpos('.', g:mark_multiple_curpos)
 
         "Clear highlighting
-        call clearmatches()
+        call s:ClearMatches()
     endif
 endfunction
 
 
 " Call this to clear all the highlightings
 fun! MarkMultipleClean()
-    call clearmatches()
+    call s:ClearMatches()
     let g:mark_multiple_started = 0
     let g:mark_multiple_searching = 0
     let g:mark_multiple_in_normal_mode = 0
